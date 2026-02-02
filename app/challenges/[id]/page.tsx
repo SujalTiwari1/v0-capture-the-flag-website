@@ -228,15 +228,15 @@ export default function ChallengePage() {
               </p>
             </div>
 
-            {lab && (
+            {(lab || challenge.title === 'Obfuscated Code' || challenge.title === 'Anti-Debug Technique') && (
               <div className="mb-6 flex flex-col gap-2">
                 <p className="text-sm text-slate-400">
                   This challenge has an interactive lab environment where you can exploit the
                   vulnerability directly.
                 </p>
-                <Link href={`/labs/${lab.slug}`}>
+                <Link href={lab ? `/labs/${lab.slug}` : challenge.title === 'Obfuscated Code' ? '/labs/obfuscated-code' : '/labs/anti-debug-technique'}>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    Go to Lab
+                    {challenge.title === 'Anti-Debug Technique' ? 'Open Lab' : 'Go to Lab'}
                   </Button>
                 </Link>
                 <p className="text-xs text-slate-500 italic">

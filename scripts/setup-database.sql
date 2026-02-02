@@ -43,6 +43,26 @@ CREATE TABLE IF NOT EXISTS solves (
   solve_time TIMESTAMP DEFAULT now()
 );
 
+-- Create labs table
+CREATE TABLE IF NOT EXISTS labs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  challenge_id UUID NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+  slug TEXT NOT NULL UNIQUE,
+  lab_type TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT now()
+);
+
+-- Create lab_sessions table
+CREATE TABLE IF NOT EXISTS lab_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lab_id UUID NOT NULL REFERENCES labs(id) ON DELETE CASCADE,
+  started_at TIMESTAMP DEFAULT now(),
+  completed_at TIMESTAMP,
+  success BOOLEAN DEFAULT false
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_challenges_category ON challenges(category);
@@ -50,12 +70,18 @@ CREATE INDEX idx_submissions_user_id ON submissions(user_id);
 CREATE INDEX idx_submissions_challenge_id ON submissions(challenge_id);
 CREATE INDEX idx_solves_user_id ON solves(user_id);
 CREATE INDEX idx_solves_challenge_id ON solves(challenge_id);
+CREATE INDEX idx_labs_challenge_id ON labs(challenge_id);
+CREATE INDEX idx_labs_slug ON labs(slug);
+CREATE INDEX idx_lab_sessions_user_id ON lab_sessions(user_id);
+CREATE INDEX idx_lab_sessions_lab_id ON lab_sessions(lab_id);
 
 -- Enable RLS (Row Level Security)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE solves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE labs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lab_sessions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users table
 CREATE POLICY "users_public_profile" ON users FOR SELECT USING (true);
@@ -71,3 +97,11 @@ CREATE POLICY "submissions_insert_own" ON submissions FOR INSERT WITH CHECK (aut
 -- RLS Policies for solves table
 CREATE POLICY "solves_readable" ON solves FOR SELECT USING (true);
 CREATE POLICY "solves_insert_own" ON solves FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- RLS Policies for labs table
+CREATE POLICY "labs_readable" ON labs FOR SELECT USING (true);
+
+-- RLS Policies for lab_sessions table
+CREATE POLICY "lab_sessions_own_only" ON lab_sessions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "lab_sessions_insert_own" ON lab_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "lab_sessions_update_own" ON lab_sessions FOR UPDATE USING (auth.uid() = user_id);

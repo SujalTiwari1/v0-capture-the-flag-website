@@ -24,6 +24,7 @@ export default function ChallengePage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSolved, setIsSolved] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [labSlug, setLabSlug] = useState<string | null>(null);
 
   useEffect(() => {
     fetchChallenge();
@@ -42,10 +43,30 @@ export default function ChallengePage() {
 
       setChallenge(data);
       checkIfSolved(data.id);
+      fetchLabSlug(data.id);
     } catch (error) {
       console.error('Error fetching challenge:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLabSlug = async (cId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('labs')
+        .select('slug')
+        .eq('challenge_id', cId)
+        .single();
+
+      if (error) {
+        console.log('No lab found for this challenge');
+        return;
+      }
+
+      setLabSlug(data?.slug || null);
+    } catch (error) {
+      console.log('Error fetching lab:', error);
     }
   };
 
@@ -205,6 +226,16 @@ export default function ChallengePage() {
                 {challenge.full_description || challenge.description}
               </p>
             </div>
+
+            {labSlug && (
+              <div className="mb-6">
+                <Link href={`/labs/${labSlug}`}>
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6">
+                    🧪 Go to Lab
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             {challenge.resources && Object.keys(challenge.resources).length > 0 && (
               <div className="mb-6">

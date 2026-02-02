@@ -56,12 +56,12 @@ This document lists the default seeded challenges in this CTF instance and their
     - Uses only cookies for auth, and  
     - Lacks CSRF protections (no CSRF token, no SameSite protection assumptions, etc.).
   - Craft an HTML form or request that triggers this action and host it on an external site:
-    ```html
+    \`\`\`html
     <form action="https://victim-site/action" method="POST">
       <input type="hidden" name="some_param" value="malicious_value">
     </form>
     <script>document.forms[0].submit();</script>
-    ```
+    \`\`\`
   - Have a logged-in victim visit your page so their browser auto-sends their cookies, performing the action and triggering the flag.
 
 ---
@@ -307,4 +307,3 @@ This document lists the default seeded challenges in this CTF instance and their
   - Position yourself as a man-in-the-middle via ARP spoofing, rogue access point, or proxy configuration (depending on the challenge story).
   - Capture traffic (e.g., with Wireshark or `tcpdump`) while the victim communicates with the service.
   - If TLS is weak/misconfigured (e.g., accepting your certificate), decrypt or strip the encryption to see the plaintext traffic and extract the flag.
-

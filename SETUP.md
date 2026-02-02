@@ -35,10 +35,10 @@ First, create the database tables. Copy and paste the contents of `/scripts/setu
 
 Add the following environment variables to your Vercel/v0 project settings:
 
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+\`\`\`
 
 You can find these values in your Supabase project settings under "API".
 
@@ -51,7 +51,7 @@ In Supabase, ensure:
 
 ## File Structure
 
-```
+\`\`\`
 /app
   /page.tsx                 # Home page with hero section
   /login/page.tsx          # Login page
@@ -70,7 +70,7 @@ In Supabase, ensure:
   /seed-challenges.sql     # Sample challenges data
 
 /components/ui/           # Pre-built shadcn/ui components
-```
+\`\`\`
 
 ## Key Features Explained
 
@@ -107,7 +107,7 @@ Personal dashboard with:
 
 To add custom challenges, insert them into the `challenges` table:
 
-```sql
+\`\`\`sql
 INSERT INTO challenges (title, category, difficulty, target_year, description, full_description, flag_hash, points, resources)
 VALUES (
   'Challenge Title',
@@ -120,7 +120,7 @@ VALUES (
   10,
   '{"resource_name": "https://resource-url.com"}'::jsonb
 );
-```
+\`\`\`
 
 ## Customization
 
@@ -145,10 +145,10 @@ All styling uses Tailwind CSS with a dark slate theme. Edit the color classes in
 4. Click "Deploy"
 
 ### Deploy Using CLI
-```bash
+\`\`\`bash
 npm install -g vercel
 vercel
-```
+\`\`\`
 
 ## Troubleshooting
 

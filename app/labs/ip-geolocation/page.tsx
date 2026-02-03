@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface GeoLocation {
   country: string;
@@ -16,6 +17,11 @@ interface GeoLocation {
 }
 
 export default function IPGeolocationLab() {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
+  const backHref = challengeId ? `/challenges/${challengeId}` : '/challenges';
+  const backText = challengeId ? 'Back to Challenge' : 'Back to Challenges';
+  
   const [ipInput, setIpInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [flagFound, setFlagFound] = useState(false);
@@ -86,9 +92,9 @@ export default function IPGeolocationLab() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8">
       <div className="max-w-4xl mx-auto">
-        <Link href="/challenges">
-          <Button variant="outline" className="mb-6 bg-transparent">
-            ← Back to Challenges
+        <Link href={backHref}>
+          <Button variant="outline" className="mb-6 border-slate-600 text-slate-200 hover:bg-slate-800">
+            ← {backText}
           </Button>
         </Link>
 

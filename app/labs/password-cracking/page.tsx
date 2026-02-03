@@ -31,8 +31,8 @@ function HintItem({ title, children }: { title: string; children: React.ReactNod
 export default function PasswordCrackingLab() {
     const searchParams = useSearchParams()
     const challengeId = searchParams.get('challengeId')
-    const backHref = challengeId ? `/challenges/${challengeId}` : "/labs"
-    const backText = challengeId ? "Back to labs" : "Back to labs"
+    const backHref = challengeId ? `/challenges/${challengeId}` : "/challenges"
+    const backText = challengeId ? "Back to Challenge" : "Back to Challenges"
 
     const [flag, setFlag] = useState("")
     const [result, setResult] = useState<"success" | "error" | null>(null)
@@ -72,9 +72,13 @@ export default function PasswordCrackingLab() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
             <div className="max-w-4xl mx-auto">
-                <Link href={backHref} className="text-blue-400 hover:text-blue-300 mb-6 block">
-                    ← {backText}
-                </Link>
+                <div className="mb-6">
+                    <Link href={backHref}>
+                        <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800">
+                            ← {backText}
+                        </Button>
+                    </Link>
+                </div>
 
                 <Card className="bg-slate-800 border-slate-700 mb-6">
                     <div className="p-8">

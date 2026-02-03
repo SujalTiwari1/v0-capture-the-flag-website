@@ -10,10 +10,21 @@ import Link from 'next/link';
 
 interface LeaderboardEntry extends User {
   solved_count: number;
+  calculated_score: number;
+}
+
+interface TeamLeaderboardEntry {
+  team_name: string;
+  total_score: number;
+  total_solves: number;
+  member_count: number;
+  members: string[];
 }
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [teamLeaderboard, setTeamLeaderboard] = useState<TeamLeaderboardEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<'individual' | 'team'>('individual');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,33 +33,84 @@ export default function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      // Fetch users with their solve counts
+      // Fetch users
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('*')
-        .order('total_score', { ascending: false });
+        .select('*');
 
       if (usersError) throw usersError;
 
-      // Fetch solve counts for each user
+      // Fetch solve counts and calculate points for each user
       const leaderboardData = await Promise.all(
         (usersData || []).map(async (user) => {
           const { data: solvesData } = await supabase
             .from('solves')
-            .select('id')
+            .select('challenge_id')
             .eq('user_id', user.id);
+
+          const solvedCount = solvesData?.length || 0;
+          
+          // Calculate total points from solved challenges (same as dashboard)
+          let totalPoints = 0;
+          if (solvesData && solvesData.length > 0) {
+            const challengeIds = solvesData.map((s) => s.challenge_id);
+            const { data: challengesData } = await supabase
+              .from('challenges')
+              .select('points')
+              .in('id', challengeIds);
+
+            totalPoints = challengesData?.reduce((sum, c) => sum + (c.points || 0), 0) || 0;
+          }
 
           return {
             ...user,
-            solved_count: solvesData?.length || 0,
+            solved_count: solvedCount,
+            calculated_score: totalPoints,
           };
         })
       );
 
-      // Sort by total_score descending
-      leaderboardData.sort((a, b) => b.total_score - a.total_score);
+      // Sort by calculated_score descending
+      leaderboardData.sort((a, b) => (b.calculated_score ?? 0) - (a.calculated_score ?? 0));
 
       setLeaderboard(leaderboardData);
+
+      // Calculate team leaderboard
+      const teamMap = new Map<string, {
+        total_score: number;
+        total_solves: number;
+        members: string[];
+      }>();
+
+      leaderboardData.forEach((user) => {
+        if (user.team_name) {
+          const teamName = user.team_name;
+          if (!teamMap.has(teamName)) {
+            teamMap.set(teamName, {
+              total_score: 0,
+              total_solves: 0,
+              members: [],
+            });
+          }
+          const team = teamMap.get(teamName)!;
+          team.total_score += user.calculated_score ?? 0;
+          team.total_solves += user.solved_count ?? 0;
+          team.members.push(user.username);
+        }
+      });
+
+      // Convert map to array and sort by total_score
+      const teamLeaderboardData: TeamLeaderboardEntry[] = Array.from(teamMap.entries())
+        .map(([team_name, data]) => ({
+          team_name,
+          total_score: data.total_score,
+          total_solves: data.total_solves,
+          member_count: data.members.length,
+          members: data.members,
+        }))
+        .sort((a, b) => b.total_score - a.total_score);
+
+      setTeamLeaderboard(teamLeaderboardData);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     } finally {
@@ -94,7 +156,33 @@ export default function LeaderboardPage() {
           </Link>
         </div>
 
-        <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+        {/* Tabs for Individual and Team Leaderboard */}
+        <div className="mb-6 flex gap-2 border-b border-slate-700">
+          <button
+            onClick={() => setActiveTab('individual')}
+            className={`px-6 py-3 font-medium transition ${
+              activeTab === 'individual'
+                ? 'text-blue-400 border-b-2 border-blue-400'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Individual
+          </button>
+          <button
+            onClick={() => setActiveTab('team')}
+            className={`px-6 py-3 font-medium transition ${
+              activeTab === 'team'
+                ? 'text-blue-400 border-b-2 border-blue-400'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Teams
+          </button>
+        </div>
+
+        {/* Individual Leaderboard */}
+        {activeTab === 'individual' && (
+          <Card className="bg-slate-800 border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -126,10 +214,12 @@ export default function LeaderboardPage() {
                     </TableCell>
                     <TableCell className="text-slate-400">{entry.year}</TableCell>
                     <TableCell className="text-right">
-                      <span className="text-blue-400 font-bold text-lg">{entry.total_score}</span>
+                      <span className="text-blue-400 font-bold text-lg">
+                        {entry.calculated_score ?? 0}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="text-green-400 font-bold">{entry.solved_count}</span>
+                      <span className="text-green-400 font-bold">{entry.solved_count ?? 0}</span>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -143,6 +233,71 @@ export default function LeaderboardPage() {
             </div>
           )}
         </Card>
+        )}
+
+        {/* Team Leaderboard */}
+        {activeTab === 'team' && (
+          <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-slate-700 bg-slate-700/50">
+                    <TableHead className="text-slate-300">Rank</TableHead>
+                    <TableHead className="text-slate-300">Team Name</TableHead>
+                    <TableHead className="text-slate-300">Members</TableHead>
+                    <TableHead className="text-slate-300 text-right">Total Points</TableHead>
+                    <TableHead className="text-slate-300 text-right">Total Solves</TableHead>
+                    <TableHead className="text-slate-300 text-right">Avg Score</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamLeaderboard.map((team, index) => (
+                    <TableRow key={team.team_name} className="border-slate-700 hover:bg-slate-700/50 transition">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-bold text-lg w-8">{index + 1}</span>
+                          {index === 0 && <span className="text-2xl">🏆</span>}
+                          {index === 1 && <span className="text-2xl">🥈</span>}
+                          {index === 2 && <span className="text-2xl">🥉</span>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-base px-3 py-1">
+                          {team.team_name}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-white font-medium">{team.member_count} {team.member_count === 1 ? 'member' : 'members'}</span>
+                          <span className="text-slate-400 text-xs">{team.members.join(', ')}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-blue-400 font-bold text-lg">
+                          {team.total_score}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-green-400 font-bold">{team.total_solves}</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-slate-300 font-medium">
+                          {team.member_count > 0 ? Math.round(team.total_score / team.member_count) : 0}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {teamLeaderboard.length === 0 && (
+              <div className="p-12 text-center text-slate-400">
+                No teams yet. Create a team during registration!
+              </div>
+            )}
+          </Card>
+        )}
       </div>
     </div>
   );

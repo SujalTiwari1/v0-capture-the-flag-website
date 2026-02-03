@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const internalMessages = [
   {
@@ -112,6 +113,11 @@ Lisa`
 ];
 
 export default function SocialEngineeringLab() {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
+  const backHref = challengeId ? `/challenges/${challengeId}` : '/challenges';
+  const backText = challengeId ? 'Back to Challenge' : 'Back to Challenges';
+  
   const [answer, setAnswer] = useState('');
   const [showFlag, setShowFlag] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -151,8 +157,10 @@ export default function SocialEngineeringLab() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <Link href="/challenges" className="text-blue-400 hover:text-blue-300">
-            ← Back to Challenges
+          <Link href={backHref}>
+            <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800">
+              ← {backText}
+            </Button>
           </Link>
         </div>
 

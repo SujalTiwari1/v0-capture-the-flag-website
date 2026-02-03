@@ -122,3 +122,16 @@ ON CONFLICT (slug) DO NOTHING;
 INSERT INTO labs (challenge_id, slug, lab_type, is_active)
 SELECT id, 'ip-geolocation', 'osint', true FROM challenges WHERE title = 'IP Geolocation'
 ON CONFLICT (slug) DO NOTHING;
+
+-- Miscellaneous labs
+INSERT INTO labs (challenge_id, slug, lab_type, is_active)
+SELECT id, 'steganography', 'misc', true FROM challenges WHERE title = 'Steganography'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO labs (challenge_id, slug, lab_type, is_active)
+SELECT id, 'password-cracking', 'misc', true FROM challenges WHERE title = 'Password Cracking'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO labs (challenge_id, slug, lab_type, is_active)
+SELECT id, 'social-engineering', 'misc', true FROM challenges WHERE title = 'Social Engineering'
+ON CONFLICT (slug) DO NOTHING;

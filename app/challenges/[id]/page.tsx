@@ -240,7 +240,7 @@ export default function ChallengePage() {
                   This challenge has an interactive lab environment where you can exploit the
                   vulnerability directly.
                 </p>
-                <Link href={`/labs/${lab.slug}`}>
+                <Link href={`/labs/${lab.slug}?challengeId=${challengeId}`}>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     Go to Lab
                   </Button>

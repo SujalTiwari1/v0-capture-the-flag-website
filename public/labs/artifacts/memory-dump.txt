@@ -1,5 +1,48 @@
-Simulated memory dump with various process data...
-Process ID: 1024 - buffer segment: flag{mem
-Process ID: 2048 - buffer segment: ory_extr
-Process ID: 3072 - buffer segment: acted}
-Other random process data continues...
+
+Process ID: 1001 - buffer segment: init_data
+Process ID: 1002 - buffer segment: cache_buffer
+Process ID: 1003 - buffer segment: user_session
+Process ID: 1004 - buffer segment: temp_data
+Process ID: 1005 - buffer segment: random_string
+Process ID: 1006 - buffer segment: kernel_stack
+Process ID: 1007 - buffer segment: io_buffer
+Process ID: 1008 - buffer segment: debug_trace
+Process ID: 1009 - buffer segment: config_block
+Process ID: 1010 - buffer segment: session_key
+Process ID: 1011 - buffer segment: heap_alloc
+Process ID: 1012 - buffer segment: thread_state
+Process ID: 1013 - buffer segment: log_entry
+Process ID: 1014 - buffer segment: temp_cache
+Process ID: 1015 - buffer segment: buffer_overflow
+Process ID: 1016 - buffer segment: stack_frame
+Process ID: 1017 - buffer segment: network_packet
+Process ID: 1018 - buffer segment: auth_token
+Process ID: 1019 - buffer segment: debug_info
+Process ID: 1020 - buffer segment: flag{mem <-- LINE 20
+Process ID: 1021 - buffer segment: random_data
+Process ID: 1022 - buffer segment: io_trace
+Process ID: 1023 - buffer segment: kernel_heap
+...
+Process ID: 1070 - buffer segment: temp_cache
+Process ID: 1071 - buffer segment: debug_trace
+Process ID: 1072 - buffer segment: session_data
+Process ID: 1073 - buffer segment: user_buffer
+Process ID: 1074 - buffer segment: cache_block
+Process ID: 1075 - buffer segment: ory_extr <-- LINE 75
+Process ID: 1076 - buffer segment: random_string
+Process ID: 1077 - buffer segment: kernel_stack
+Process ID: 1078 - buffer segment: io_buffer
+Process ID: 1079 - buffer segment: debug_trace
+Process ID: 1080 - buffer segment: config_block
+...
+Process ID: 1120 - buffer segment: acted} <-- LINE 120
+Process ID: 1121 - buffer segment: random_data
+Process ID: 1122 - buffer segment: io_trace
+Process ID: 1123 - buffer segment: kernel_heap
+Process ID: 1124 - buffer segment: temp_cache
+Process ID: 1125 - buffer segment: debug_trace
+Process ID: 1126 - buffer segment: session_data
+Process ID: 1127 - buffer segment: user_buffer
+Process ID: 1128 - buffer segment: cache_block
+Process ID: 1129 - buffer segment: random_string
+Process ID: 1130 - buffer segment: kernel_stack

@@ -5,8 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function SubdomainEnumerationLab() {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
+  const backHref = challengeId ? `/challenges/${challengeId}` : '/challenges';
+  const backText = challengeId ? 'Back to Challenge' : 'Back to Challenges';
   const [domain, setDomain] = useState('');
   const [results, setResults] = useState<string[]>([]);
   const [flagFound, setFlagFound] = useState(false);
@@ -85,9 +90,9 @@ export default function SubdomainEnumerationLab() {
     <div className="min-h-screen bg-slate-900 text-white p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link href="/challenges">
-            <Button variant="outline" className="mb-4 bg-transparent">
-              ← Back to Challenges
+          <Link href={backHref}>
+            <Button variant="outline" className="mb-4 border-slate-600 text-slate-200 hover:bg-slate-800">
+              ← {backText}
             </Button>
           </Link>
           <h1 className="text-4xl font-bold mb-2">Subdomain Enumeration Lab</h1>

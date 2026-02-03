@@ -145,3 +145,17 @@ function PasswordCrackingLabContent() {
         </div>
     )
 }
+
+export default function PasswordCrackingLab() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
+                <div className="max-w-2xl mx-auto">
+                    <p className="text-slate-400">Loading...</p>
+                </div>
+            </div>
+        }>
+            <PasswordCrackingLabContent />
+        </Suspense>
+    );
+}

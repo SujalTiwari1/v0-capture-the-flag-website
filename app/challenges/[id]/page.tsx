@@ -266,12 +266,18 @@ export default function ChallengePage() {
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('solves')
         .select('id')
         .eq('challenge_id', cId)
         .eq('user_id', authData.user.id)
-        .single();
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" which is expected when not solved
+        console.error('Error checking solve status:', error);
+        return;
+      }
 
       setIsSolved(!!data);
     } catch (error) {
@@ -425,7 +431,7 @@ export default function ChallengePage() {
                   This challenge has an interactive lab environment where you can exploit the
                   vulnerability directly.
                 </p>
-                <Link href={`/labs/${lab.slug}`}>
+                <Link href={`/labs/${lab.slug}?challengeId=${challengeId}`}>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     Go to Lab
                   </Button>

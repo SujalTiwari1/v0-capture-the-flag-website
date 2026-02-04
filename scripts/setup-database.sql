@@ -85,7 +85,28 @@ ALTER TABLE lab_sessions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users table
 CREATE POLICY "users_public_profile" ON users FOR SELECT USING (true);
+CREATE POLICY "users_insert_own" ON users FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "users_update_own" ON users FOR UPDATE USING (auth.uid() = id);
+
+-- Function to create user record (bypasses RLS with SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.create_user_profile(
+  p_user_id UUID,
+  p_email TEXT,
+  p_username TEXT,
+  p_team_name TEXT DEFAULT NULL,
+  p_year TEXT DEFAULT '1st'
+)
+RETURNS void AS $$
+BEGIN
+  -- Insert user record, bypassing RLS
+  INSERT INTO public.users (id, email, username, team_name, year, total_score)
+  VALUES (p_user_id, p_email, p_username, p_team_name, p_year, 0)
+  ON CONFLICT (id) DO UPDATE SET
+    username = EXCLUDED.username,
+    team_name = EXCLUDED.team_name,
+    year = EXCLUDED.year;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- RLS Policies for challenges table
 CREATE POLICY "challenges_readable" ON challenges FOR SELECT USING (true);

@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
-export default function MemoryDumpLab() {
+function MemoryDumpLabContent() {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
+  const backHref = challengeId ? `/challenges/${challengeId}` : '/challenges';
+  const backText = challengeId ? 'Back to Challenge' : 'Back to Challenges';
   const [answer, setAnswer] = useState('');
   const [showFlag, setShowFlag] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -67,8 +72,10 @@ export default function MemoryDumpLab() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <Link href="/challenges" className="text-blue-400 hover:text-blue-300">
-            ← Back to Challenges
+          <Link href={backHref}>
+            <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800">
+              ← {backText}
+            </Button>
           </Link>
         </div>
 
@@ -214,5 +221,19 @@ export default function MemoryDumpLab() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MemoryDumpLab() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-slate-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <MemoryDumpLabContent />
+    </Suspense>
   );
 }

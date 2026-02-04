@@ -30,28 +30,51 @@ export default function RegisterPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username,
+            team_name: teamName || null,
+            year,
+          },
+        },
       });
 
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        const { error: insertError } = await supabase.from('users').insert({
-          id: data.user.id,
-          email,
-          username,
-          team_name: teamName || null,
-          year,
+        // Use database function to create user record (bypasses RLS)
+        const { error: functionError } = await supabase.rpc('create_user_profile', {
+          p_user_id: data.user.id,
+          p_email: email,
+          p_username: username,
+          p_team_name: teamName || null,
+          p_year: year,
         });
 
-        if (insertError) throw insertError;
+        if (functionError) {
+          console.error('Error creating user profile:', functionError);
+          throw functionError;
+        }
 
-        router.push('/dashboard');
+        // Check if email confirmation is required
+        if (data.session) {
+          // User is immediately logged in (email confirmation disabled)
+          router.push('/dashboard');
+        } else {
+          // Email confirmation required
+          setError(null);
+          alert('Registration successful! Please check your email to verify your account before logging in.');
+          router.push('/login');
+        }
       }
     } catch (err: any) {
-      if (err?.status === 429) {
-        setError('Too many sign-up attempts. Please wait a minute and try again.');
+      if (err?.status === 429 || err?.message?.includes('429')) {
+        setError('Too many sign-up attempts. Supabase has rate limiting enabled to prevent abuse. Please wait 1-2 minutes before trying again. If you already registered, try logging in instead.');
+      } else if (err?.code === '23505') {
+        // Unique constraint violation (user already exists)
+        setError('This email or username is already registered. Please try logging in instead.');
       } else {
-        setError(err instanceof Error ? err.message : 'Registration failed');
+        setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -106,6 +129,9 @@ export default function RegisterPage() {
                 placeholder="Your team name"
                 className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
               />
+              <p className="text-xs text-slate-400 mt-1">
+                ⚠️ Team names are case-sensitive. Make sure all team members use the exact same spelling and capitalization.
+              </p>
             </div>
 
             <div>
@@ -143,6 +169,11 @@ export default function RegisterPage() {
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3">
                 <p className="text-red-400 text-sm">{error}</p>
+                {error.includes('Too many sign-up attempts') && (
+                  <p className="text-slate-400 text-xs mt-2">
+                    💡 Tip: Check if your email already exists in Supabase. If it does, you can try logging in instead of registering again.
+                  </p>
+                )}
               </div>
             )}
 

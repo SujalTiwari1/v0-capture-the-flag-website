@@ -10,4 +10,3 @@ export async function POST(request: Request) {
     flag: 'flag{csrf_protected}',
   });
 }
-

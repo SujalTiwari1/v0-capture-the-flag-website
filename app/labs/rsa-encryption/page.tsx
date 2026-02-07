@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-export default function RSAEncryptionLab() {
+function RSAEncryptionLabContent() {
+  const searchParams = useSearchParams();
   const [plaintext, setPlaintext] = useState("");
   const [showFlag, setShowFlag] = useState(false);
   const [challengeId, setChallengeId] = useState<string | null>(null);
+  const challengeIdFromUrl = searchParams.get("challengeId");
+  const backHref = challengeIdFromUrl || challengeId ? `/challenges/${challengeIdFromUrl || challengeId}` : "/challenges";
+  const backText = challengeIdFromUrl || challengeId ? "Back to Challenge" : "Back to Challenges";
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -77,14 +82,14 @@ export default function RSAEncryptionLab() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <Link
-            href="/challenges"
+            href={backHref}
             className="text-blue-400 hover:text-blue-300"
           >
-            ← Back to Challenges
+            ← {backText}
           </Link>
         </div>
 
-        <Card className="bg-slate-900/60 border border-slate-700 mb-6">
+        {/* <Card className="bg-slate-900/60 border border-slate-700 mb-6">
           <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="space-y-1">
               <p className="text-white font-semibold">Problem page</p>
@@ -92,15 +97,13 @@ export default function RSAEncryptionLab() {
                 Open the challenge to see full description and submit the flag.
               </p>
             </div>
-            <Link
-              href={challengeId ? `/challenges/${challengeId}` : "/challenges"}
-            >
+            <Link href={backHref}>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Open Problem
               </Button>
             </Link>
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="bg-slate-800 border-slate-700 mb-6">
           <div className="p-8">
@@ -242,5 +245,13 @@ export default function RSAEncryptionLab() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RSAEncryptionLab() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8"><p className="text-slate-400">Loading...</p></div>}>
+      <RSAEncryptionLabContent />
+    </Suspense>
   );
 }

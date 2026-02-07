@@ -437,6 +437,30 @@ INSERT INTO
   labs (challenge_id, slug, lab_type, is_active)
 SELECT
   id,
+  'obfuscated-code',
+  'reverse',
+  true
+FROM
+  challenges
+WHERE
+  title = 'Obfuscated Code' ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO
+  labs (challenge_id, slug, lab_type, is_active)
+SELECT
+  id,
+  'anti-debug-technique',
+  'reverse',
+  true
+FROM
+  challenges
+WHERE
+  title = 'Anti-Debug Technique' ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO
+  labs (challenge_id, slug, lab_type, is_active)
+SELECT
+  id,
   'memory-analysis',
   'forensics',
   true

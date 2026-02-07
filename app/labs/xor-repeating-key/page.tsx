@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +44,8 @@ function xorDecrypt(hex: string, key: string): string {
   return result;
 }
 
-export default function XorRepeatingKeyLab() {
+function XorRepeatingKeyLabContent() {
+  const searchParams = useSearchParams();
   const [plaintextGuess, setPlaintextGuess] = useState("");
   const [keyGuess, setKeyGuess] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -51,6 +54,18 @@ export default function XorRepeatingKeyLab() {
   const [showFlag, setShowFlag] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const challengeIdFromUrl = searchParams.get("challengeId");
+  const backHref = challengeIdFromUrl || challengeId ? `/challenges/${challengeIdFromUrl || challengeId}` : "/challenges";
+  const backText = challengeIdFromUrl || challengeId ? "Back to Challenge" : "Back to Challenges";
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from("challenges").select("id").eq("title", "XOR Repeating Key").maybeSingle();
+      setChallengeId(data?.id ?? null);
+    };
+    load();
+  }, []);
 
   const handlePreview = () => {
     try {
@@ -122,11 +137,8 @@ export default function XorRepeatingKeyLab() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <Link
-            href="/challenges"
-            className="text-blue-400 hover:text-blue-300"
-          >
-            ← Back to Challenges
+          <Link href={backHref} className="text-blue-400 hover:text-blue-300">
+            ← {backText}
           </Link>
         </div>
 
@@ -307,5 +319,13 @@ export default function XorRepeatingKeyLab() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function XorRepeatingKeyLab() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8"><p className="text-slate-400">Loading...</p></div>}>
+      <XorRepeatingKeyLabContent />
+    </Suspense>
   );
 }

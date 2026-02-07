@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,13 +23,26 @@ for i from 0 to length(data) - 1:
 print output
 `;
 
-export default function ObfuscatedCodeLab() {
+function ObfuscatedCodeLabContent() {
+  const searchParams = useSearchParams();
   const [answer, setAnswer] = useState("");
   const [showFlag, setShowFlag] = useState(false);
   const [message, setMessage] =
     useState<{ type: "success" | "error"; text: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const challengeIdFromUrl = searchParams.get("challengeId");
+  const backHref = challengeIdFromUrl || challengeId ? `/challenges/${challengeIdFromUrl || challengeId}` : "/challenges";
+  const backText = challengeIdFromUrl || challengeId ? "Back to Challenge" : "Back to Challenges";
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from("challenges").select("id").eq("title", "Obfuscated Code").maybeSingle();
+      setChallengeId(data?.id ?? null);
+    };
+    load();
+  }, []);
 
   /* ONLY VALID ANSWER */
   const EXPECTED_ANSWER = "xor_is_simple";
@@ -64,8 +79,8 @@ export default function ObfuscatedCodeLab() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <Link href="/challenges" className="text-blue-400 hover:text-blue-300">
-            ← Back to Challenges
+          <Link href={backHref} className="text-blue-400 hover:text-blue-300">
+            ← {backText}
           </Link>
         </div>
 
@@ -181,5 +196,13 @@ export default function ObfuscatedCodeLab() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ObfuscatedCodeLab() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8"><p className="text-slate-400">Loading...</p></div>}>
+      <ObfuscatedCodeLabContent />
+    </Suspense>
   );
 }

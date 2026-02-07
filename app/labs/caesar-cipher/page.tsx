@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function CaesarCipherLab() {
+function CaesarCipherLabContent() {
+  const searchParams = useSearchParams();
   const [answer, setAnswer] = useState("");
   const [flag, setFlag] = useState<string | null>(null);
   const [message, setMessage] = useState<{
@@ -18,6 +20,9 @@ export default function CaesarCipherLab() {
   const [submitting, setSubmitting] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [challengeId, setChallengeId] = useState<string | null>(null);
+  const challengeIdFromUrl = searchParams.get("challengeId");
+  const backHref = challengeIdFromUrl || challengeId ? `/challenges/${challengeIdFromUrl || challengeId}` : "/challenges";
+  const backText = challengeIdFromUrl || challengeId ? "Back to Challenge" : "Back to Challenges";
 
   const ENCRYPTED_TEXT = "Wkh txlfn eurzq ira mxpsv ryhu wkh odcb grj";
 
@@ -85,14 +90,14 @@ export default function CaesarCipherLab() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <Link
-            href="/challenges"
+            href={backHref}
             className="text-blue-400 hover:text-blue-300"
           >
-            ← Back to Challenges
+            ← {backText}
           </Link>
         </div>
 
-        <Card className="bg-slate-900/60 border border-slate-700 mb-6">
+        {/* <Card className="bg-slate-900/60 border border-slate-700 mb-6">
           <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="space-y-1">
               <p className="text-white font-semibold">Problem page</p>
@@ -100,15 +105,13 @@ export default function CaesarCipherLab() {
                 Open the challenge to see full description and submit the flag.
               </p>
             </div>
-            <Link
-              href={challengeId ? `/challenges/${challengeId}` : "/challenges"}
-            >
+            <Link href={backHref}>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Open Problem
               </Button>
             </Link>
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="bg-slate-800 border-slate-700 mb-6">
           <div className="p-8">
@@ -266,5 +269,13 @@ export default function CaesarCipherLab() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CaesarCipherLab() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8"><p className="text-slate-400">Loading...</p></div>}>
+      <CaesarCipherLabContent />
+    </Suspense>
   );
 }

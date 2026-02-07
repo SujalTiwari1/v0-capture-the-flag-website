@@ -16,42 +16,39 @@ function CSRFLabContent() {
   const [currentEmail, setCurrentEmail] = useState('user@example.com');
   const [newEmail, setNewEmail] = useState('');
   const [showFlag, setShowFlag] = useState(false);
+  const [flagFromApi, setFlagFromApi] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const FLAG = 'flag{csrf_protected}';
-
-  const handleChangeEmail = (e: React.FormEvent) => {
+  const handleChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) return;
 
     setSubmitting(true);
     setMessage(null);
 
-    // VULNERABLE: No CSRF token validation
-    // In a real scenario, this would be a POST request without CSRF token
-
-    setTimeout(() => {
-      // Simulate successful email change without CSRF protection
-      setCurrentEmail(newEmail);
-      setMessage({
-        type: 'success',
-        text: '✓ Email changed successfully! (No CSRF protection)',
+    try {
+      const res = await fetch('/api/labs/csrf-attack/change-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newEmail }),
       });
-      setNewEmail('');
-      setShowFlag(true);
+      const data = await res.json();
+      setCurrentEmail(data.success ? newEmail : currentEmail);
+      setMessage({
+        type: data.success ? 'success' : 'error',
+        text: data.message ?? 'Request failed.',
+      });
+      if (data.flag) {
+        setFlagFromApi(data.flag);
+        setShowFlag(true);
+      }
+      if (data.success) setNewEmail('');
+    } catch {
+      setMessage({ type: 'error', text: 'Request failed.' });
+    } finally {
       setSubmitting(false);
-    }, 500);
-  };
-
-  const simulateExternalAttack = () => {
-    // Simulate an external site making a request to change email
-    setMessage({
-      type: 'success',
-      text: '✓ External request intercepted! CSRF vulnerability demonstrated.',
-    });
-    setCurrentEmail('attacker@evil.com');
-    setShowFlag(true);
+    }
   };
 
   return (
@@ -79,9 +76,12 @@ function CSRFLabContent() {
             </p>
 
             <div className="bg-slate-900/50 border border-slate-700 rounded p-4 mb-6">
-              <h3 className="text-sm font-mono text-green-400 mb-2">Vulnerable Endpoint:</h3>
+              <h3 className="text-sm font-mono text-green-400 mb-2">Vulnerable endpoint (discover via DevTools or docs):</h3>
               <p className="text-xs font-mono text-slate-300">
-                POST /api/change-email (No CSRF Token Required)
+                POST /api/labs/csrf-attack/change-email — no CSRF token required.
+              </p>
+              <p className="text-xs text-amber-300/90 mt-2">
+                The flag is only revealed when the email change is triggered from another page (e.g. an attacker’s page), not from this form.
               </p>
             </div>
 
@@ -112,7 +112,7 @@ function CSRFLabContent() {
                   disabled={submitting}
                 />
                 <p className="text-xs text-slate-400 mt-1">
-                  Notice: No CSRF token is required!
+                  Using this form will change the email but will not reveal the flag — you must trigger the same request from another page to demonstrate CSRF.
                 </p>
               </div>
 
@@ -146,30 +146,24 @@ function CSRFLabContent() {
             </form>
 
             <div className="border-t border-slate-700 pt-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Simulate External Attack</h3>
-              <p className="text-slate-400 mb-4">
-                Click below to simulate an attacker's website making a request to change your email:
+              <h3 className="text-lg font-semibold text-white mb-2">Your goal</h3>
+              <p className="text-slate-400 text-sm">
+                Get the flag by having the email change triggered from a different page (same site or another origin). Hint: craft a page that sends a POST to the vulnerable endpoint when loaded, then open it while “logged in” here (e.g. in another tab).
               </p>
-              <Button
-                onClick={simulateExternalAttack}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2"
-              >
-                🚀 Trigger CSRF Attack
-              </Button>
             </div>
           </div>
         </Card>
 
-        {showFlag && (
+        {showFlag && flagFromApi && (
           <Card className="bg-green-500/10 border-green-500/20">
             <div className="p-8">
               <h2 className="text-2xl font-bold text-green-400 mb-4">🎉 CSRF Vulnerability Exploited!</h2>
               <p className="text-slate-300 mb-4">
-                You successfully demonstrated a CSRF vulnerability. Email was changed without proper authentication!
+                You successfully demonstrated a CSRF vulnerability by triggering the change from another page.
               </p>
               <div className="bg-slate-900/50 border border-green-500/30 rounded p-4 mb-6">
                 <p className="text-sm text-slate-400 mb-2">Flag:</p>
-                <p className="font-mono text-green-400 text-lg break-all">{FLAG}</p>
+                <p className="font-mono text-green-400 text-lg break-all">{flagFromApi}</p>
               </div>
               <p className="text-sm text-slate-400">
                 Copy the flag above and submit it in the challenge page to earn points!

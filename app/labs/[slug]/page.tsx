@@ -646,18 +646,13 @@ function CsrfLab({
           <div className="space-y-3">
             <p className="text-xs text-slate-300 font-semibold">Attacker page (simulation)</p>
             <p className="text-xs text-slate-400">
-              In the real world, an attacker would host a hidden form on another domain that
-              auto-submits to this endpoint. Below is an example HTML payload you could host
-              elsewhere.
+              The flag is only revealed when the change is triggered from another page (e.g. a
+              simulated attacker page). Find a path on this site that triggers a POST to the
+              change-email endpoint when loaded, or craft your own HTML and open it in a new tab.
             </p>
-            <Textarea
-              readOnly
-              className="bg-slate-950/70 border border-red-500/40 text-[11px] font-mono text-slate-100 min-h-[140px]"
-              value={`<form action="https://your-ctf-site.example.com/api/labs/csrf-attack/change-email" method="POST">
-  <input type="hidden" name="email" value="pwned@example.com" />
-</form>
-<script>document.forms[0].submit();</script>`}
-            />
+            <p className="text-xs text-slate-500 font-mono">
+              Hint: try paths like /labs/csrf-attack/… or use ?attacker=1 on the CSRF lab.
+            </p>
             <Button
               variant="outline"
               className="border-red-500/60 text-red-300 hover:bg-red-900/30 text-xs"
@@ -665,12 +660,8 @@ function CsrfLab({
                 window.open('/labs/csrf-attack?attacker=1', '_blank');
               }}
             >
-              Open simulated attacker page
+              Open simulated attacker page (?attacker=1)
             </Button>
-            <p className="text-xs text-slate-400">
-              When the attacker page loads while you are logged in, it silently sends the POST
-              request, changing your email and revealing the flag.
-            </p>
           </div>
         </div>
       )}

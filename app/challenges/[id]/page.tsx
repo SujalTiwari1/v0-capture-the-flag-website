@@ -377,7 +377,7 @@ export default function ChallengePage() {
         return;
       }
 
-      setLab(data as Lab);
+      setLab(data as Lab | null);
     } catch (error) {
       console.error("Error fetching lab for challenge:", error);
     }

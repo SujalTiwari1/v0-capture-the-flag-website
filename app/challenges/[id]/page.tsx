@@ -17,23 +17,30 @@ function DnsEnumerationGuide() {
   return (
     <Card className="bg-slate-800 border-slate-700 mb-6">
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">🔍 How to Solve</h2>
+        <h2 className="text-lg font-semibold text-white mb-4">🔍 Manual URL Enumeration</h2>
         
-        <div className="bg-slate-900 border border-slate-700 rounded p-4 mb-4">
-          <p className="text-slate-300 mb-3">
-            The organization has hidden internal services. Start by exploring this endpoint:
+        <div className="bg-slate-900 border border-slate-700 rounded p-4 mb-4 space-y-3">
+          <p className="text-slate-300">
+            This challenge requires <span className="font-semibold text-blue-300">manual URL discovery</span>. There are no clickable buttons or direct clues—you must explore the namespace yourself.
           </p>
-          <p className="font-mono text-blue-400 text-sm bg-slate-950 p-2 rounded">
-            /network/admin-panel
+          
+          <p className="text-slate-300">
+            <span className="font-semibold text-blue-300">Challenge IDs are irrelevant</span> for this puzzle. Instead, manually try different paths under the <span className="font-mono text-slate-400">/network/</span> namespace.
           </p>
-          <p className="text-xs text-slate-400 mt-2">
-            💡 Manually modify the URL in your browser to visit this endpoint.
+          
+          <div className="bg-slate-950 border border-slate-700 rounded p-3">
+            <p className="text-slate-400 text-xs mb-2 font-semibold">Starting Point:</p>
+            <p className="font-mono text-slate-300 text-sm">/network/admin-panel</p>
+          </div>
+
+          <p className="text-slate-400 text-xs">
+            Modify the URL in your browser address bar to explore. Each endpoint may contain hints about naming conventions used in the infrastructure.
           </p>
         </div>
 
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-4">
-          <p className="text-sm text-yellow-300">
-            <span className="font-semibold">Tip:</span> Each page you discover may contain clues about where to look next. Keep exploring and follow the hints!
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded p-4">
+          <p className="text-sm text-blue-300">
+            <span className="font-semibold">💡 Strategy:</span> Look for hints about common DevOps naming patterns. Infrastructure often uses versioning, staging conventions, and namespace hierarchies.
           </p>
         </div>
       </div>

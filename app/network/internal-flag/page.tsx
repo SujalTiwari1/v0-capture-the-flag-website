@@ -100,7 +100,8 @@ export default function InternalFlagPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* HTTP Response */}
         <Card className="bg-slate-800 border-slate-700">
           <div className="p-8">
             <div className="font-mono text-sm space-y-3 mb-6">
@@ -136,6 +137,19 @@ export default function InternalFlagPage() {
                 </div>
               )}
             </div>
+          </div>
+        </Card>
+
+        {/* Security Note */}
+        <Card className="bg-slate-800 border-slate-700">
+          <div className="p-6">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3">📝 Security Note</h3>
+            <p className="text-slate-400 text-sm">
+              Internal services are typically less protected than public-facing endpoints. Often, debugging information, configuration details, and sensitive tokens are exposed in internal namespaces that are assumed to be protected by network segmentation alone.
+            </p>
+            <p className="text-slate-400 text-sm mt-2">
+              This is a critical security principle: <span className="font-semibold text-slate-300">never rely solely on namespacing or obscurity</span> to protect sensitive data. Always apply defense-in-depth principles.
+            </p>
           </div>
         </Card>
       </div>

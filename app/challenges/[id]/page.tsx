@@ -440,7 +440,7 @@ export default function ChallengePage() {
                 </p>
                 <Link href={`/labs/${lab.slug}?challengeId=${challengeId}`}>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    Go to Lab
+                    {challenge.title === 'Anti-Debug Technique' ? 'Open Lab' : 'Go to Lab'}
                   </Button>
                 </Link>
                 <p className="text-xs text-slate-500 italic">
